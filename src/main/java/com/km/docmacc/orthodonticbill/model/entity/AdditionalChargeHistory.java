@@ -13,15 +13,14 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "billChangedHistory")
-public class BillChangedHistory extends DateTimeCreated {
+@Table(name = "additionalChargeHistory")
+public class AdditionalChargeHistory extends DateTimeCreated {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "changedHistoryId", nullable = false, updatable = false)
+    @Column(name = "chargeId", nullable = false, updatable = false)
     @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     private Long id;
-    private Long orthoBillId;
-    private Double totalBill;
-    private String billName;
-    private String reasonChanged;
+    private Long transactionId;
+    private Double additionalChargeAmount;
+    private String chargeReasonChange;
 }
