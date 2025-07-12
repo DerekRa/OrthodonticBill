@@ -1,11 +1,19 @@
 server:
-  port: 8082
+  port: ${SERVER_PORT:8082}
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api/v1/orthodonticBill/api-docs
+  swagger-ui:
+    enabled: true
+    path: /api/v1/orthodonticBill/api-docs/swagger-ui.html
 
 spring:
   application:
-    name: OrthodonticBillService
+    name: ${SERVICE_NAME:OrthodonticBillService}
   profiles:
-    active: macc-prod #nitro-prod or desktop-prod
+    active: ${ACTIVE_PROFILE:nitro-dev} #nitro-dev or desktop-dev or macc-prod or nitro-kub-prod
   datasource:
     url: jdbc:mysql://${DB_HOST:localhost}:3306/DocMACCdbBill
     password: Qwerty.12345 #change this to your database username

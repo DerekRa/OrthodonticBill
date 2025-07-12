@@ -101,7 +101,7 @@ public class BillServiceImpl extends BillServiceImplBuilder implements BillServi
                 // 3.  add addition charge to total bill
                 // 4.  computation = (total bill + total additional charge) - payment
                 // buildComputeTotalBalance()
-                orthoBillDataResponse.setTotalBalance(billsTotalName.getTotalBalance()); // to fix later on
+                orthoBillDataResponse.setTotalBalance(billsTotalName.getTotalBalance() + billsTotalName.getTotalAdditionalCharge()); // to fix later on
                 //TODO - done
                 // 1. compute breakdown payment transaction
                 // 2. check payment history for latest update
