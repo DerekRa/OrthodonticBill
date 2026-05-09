@@ -13,4 +13,4 @@ spring:
   application:
     name: ${SERVICE_NAME:OrthodonticBillService}
   profiles:
-    active: ${ACTIVE_PROFILE:nitro-dev} #nitro-dev or desktop-dev or macc-prod or nitro-kub-prod
+    active: ${ACTIVE_PROFILE:desktop-dev} #nitro-dev or desktop-dev or macc-prod or nitro-kub-prod
