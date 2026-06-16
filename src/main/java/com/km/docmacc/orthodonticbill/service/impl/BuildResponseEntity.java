@@ -8,11 +8,6 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 import java.util.Set;
 
-import static com.km.docmacc.orthodonticbill.constants.BillGlobalConstants.*;
-import static com.km.docmacc.orthodonticbill.constants.BillGlobalConstants.CREATED_BY_NAME_ID_EMPTY;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.OK;
-
 public class BuildResponseEntity {
     public ResponseEntity<HttpResponse> httpResponse(HttpStatus httpStatus, String message) {
         return new ResponseEntity<>(new HttpResponse(httpStatus.value(), httpStatus, httpStatus.getReasonPhrase().toUpperCase(),
@@ -32,6 +27,11 @@ public class BuildResponseEntity {
         HttpHeaders headers = new HttpHeaders();
         /*headers.setContentType(MediaType.TEXT_HTML);*/
         return new ResponseEntity<List<BillBreakdown>>(responseDtos, headers, httpStatus);
+    }
+    public ResponseEntity<List<OrthoBillBreakdown>> billBreakdownListPrint(HttpStatus httpStatus, List<OrthoBillBreakdown> responseDtos) {
+        HttpHeaders headers = new HttpHeaders();
+        /*headers.setContentType(MediaType.TEXT_HTML);*/
+        return new ResponseEntity<List<OrthoBillBreakdown>>(responseDtos, headers, httpStatus);
     }
     public ResponseEntity<List<OrthoBillDataChangeResponse>> billHistoryList(HttpStatus httpStatus, List<OrthoBillDataChangeResponse> responseDtos) {
         HttpHeaders headers = new HttpHeaders();

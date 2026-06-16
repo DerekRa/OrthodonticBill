@@ -165,9 +165,42 @@ public class BillServiceImpl extends BillServiceImplBuilder implements BillServi
         }
         log.info("Data of transactions ::{}",transactions);
         List<BillBreakdown> billBreakdowns = new ArrayList<BillBreakdown>();
+        if (formulateBillBreakdown(paginationData.getId(), transactions, billBreakdowns)) {
+            return billBreakdownList(OK, billBreakdowns);
+        }
+        return billBreakdownList(BAD_REQUEST, billBreakdowns);
+    }
+    /**
+     * @param billId
+     * @return
+     */
+    @Override
+    public ResponseEntity<List<OrthoBillBreakdown>> getBillBreakdownListPrint(Long billId) {
+        List<PayOrChargeTransaction> transactions;
+        transactions = payOrChargeTransactionRepository.findByOrthoBillId(billId);
+        List<BillBreakdown> billBreakdowns = new ArrayList<BillBreakdown>();
+        List<OrthoBillBreakdown> orthoBillBreakdown = new ArrayList<OrthoBillBreakdown>();
+        if (formulateBillBreakdown(billId, transactions, billBreakdowns)) {
+            for (BillBreakdown breakdown : billBreakdowns
+            ) {
+                OrthoBillBreakdown orthodonticBillBreakdownData = new OrthoBillBreakdown();
+                BeanUtils.copyProperties(breakdown, orthodonticBillBreakdownData);
+                orthoBillBreakdown.add(orthodonticBillBreakdownData);
+            }
+            return billBreakdownListPrint(OK, orthoBillBreakdown);
+        }
+        return billBreakdownListPrint(BAD_REQUEST, orthoBillBreakdown);
+    }
+    private boolean formulateBillBreakdown(Long billId,
+        List<PayOrChargeTransaction> transactions, List<BillBreakdown> billBreakdowns) {
         if(!transactions.isEmpty()){
+            // Create a mutable copy of the list
+            List<PayOrChargeTransaction> mutableTransactions = new ArrayList<>(transactions);
+
+            // Sort the mutable list by createdDateTime in descending order
+            mutableTransactions.sort(Comparator.comparing(PayOrChargeTransaction::getCreatedDateTime));
             double totalBill = 0.0;
-            Optional<OrthoBill> orthoBill = orthoBillRepository.findById(paginationData.getId());
+            Optional<OrthoBill> orthoBill = orthoBillRepository.findById(billId);
             if(orthoBill.isPresent()){
                 BillLatest billLatest = getBillLatest(orthoBill.get(), orthoBill.get().getTotalBill(), orthoBill.get().getBillName());
                 totalBill = billLatest.getTotalBill();
@@ -179,7 +212,7 @@ public class BillServiceImpl extends BillServiceImplBuilder implements BillServi
             // 3. Used the details on the loop below
             // 4. Declare totalBill on a parameter ex totalBill = 40000.0
             // 5. Declare payment parameter here ex payment = 0.0
-            for (PayOrChargeTransaction transaction : transactions){
+            for (PayOrChargeTransaction transaction : mutableTransactions){
                 BillBreakdown breakdown = new BillBreakdown();
                 BeanUtils.copyProperties(transaction, breakdown);
                 //TODO - done
@@ -203,6 +236,7 @@ public class BillServiceImpl extends BillServiceImplBuilder implements BillServi
                         totalPayment += paymentLatest.getPaymentAmount();
                         totalBill -= paymentLatest.getPaymentAmount();
                         breakdown.setPaymentAmount(paymentLatest.getPaymentAmount());
+                        breakdown.setPaymentNote(paymentLatest.getPaymentNote());
                     } else {
                         totalPayment += transaction.getPaymentAmount();
                         totalBill -= transaction.getPaymentAmount();
@@ -238,10 +272,11 @@ public class BillServiceImpl extends BillServiceImplBuilder implements BillServi
             }
             //reverse here
             billBreakdowns.sort(Comparator.comparing(BillBreakdown::getCreatedDateTime).reversed());
-            return billBreakdownList(OK, billBreakdowns);
+            return true;
         }
-        return billBreakdownList(BAD_REQUEST, billBreakdowns);
+        return false;
     }
+
     /**
      * @param paginationData
      * @return List of OrthoBillDataChangeResponse
@@ -379,29 +414,37 @@ public class BillServiceImpl extends BillServiceImplBuilder implements BillServi
         Pageable paging = PageRequest.of(paginationData.getPageNo(), paginationData.getPageSize(), sort);
         List<PaymentHistory> paymentHistories;
         if(StringUtils.equals(paginationData.getFindItem(), ASTERISK)){
+            log.info("Find item is asterisk, fetching all payment history for transaction id ::{}", paginationData.getId());
             paymentHistories = paymentHistoryRepository.findByTransactionId(paginationData.getId(), paging).toList();
         } else {
             if(paginationData.getSortBy().equalsIgnoreCase(PAYMENT_AMOUNT)){
+                log.info("Sorting by payment amount, fetching payment history for transaction id ::{} and payment amount ::{}", paginationData.getId(), paginationData.getFindItem());
                 paymentHistories = paymentHistoryRepository.findByTransactionIdAndPaymentAmount(paginationData.getId(),
                         Double.valueOf(paginationData.getFindItem()), paging).toList();
             } else if(paginationData.getSortBy().equalsIgnoreCase(CREATED_DATE)){
+                log.info("Sorting by created date, fetching payment history for transaction id ::{} and created date ::{}", paginationData.getId(), paginationData.getFindItem());
                 paymentHistories = paymentHistoryRepository.findByTransactionIdAndCreatedDate(paginationData.getId(),
                         LocalDate.parse(paginationData.getFindItem()),  paging).toList();
             } else if(paginationData.getSortBy().equalsIgnoreCase(PAYMENT_NOTE)){
+                log.info("Sorting by payment note, fetching payment history for transaction id ::{} and payment note like ::{}", paginationData.getId(), paginationData.getFindItem());
                 paymentHistories = paymentHistoryRepository.findByTransactionIdAndPaymentNoteLike(paginationData.getId(),
                         PERCENTAGE + paginationData.getFindItem() + PERCENTAGE, paging).toList();
             } else if(paginationData.getSortBy().equalsIgnoreCase(PAYMENT_REASON_CHANGE)){
+                log.info("Sorting by payment reason change, fetching payment history for transaction id ::{} and payment reason change like ::{}", paginationData.getId(), paginationData.getFindItem());
                 paymentHistories = paymentHistoryRepository.findByTransactionIdAndPaymentReasonChangeLike(paginationData.getId(),
                         PERCENTAGE + paginationData.getFindItem() + PERCENTAGE, paging).toList();
             } else if(paginationData.getSortBy().equalsIgnoreCase(CREATED_BY_NAME)){
+                log.info("Sorting by created by name, fetching payment history for transaction id ::{} and created by name like ::{}", paginationData.getId(), paginationData.getFindItem());
                 paymentHistories = paymentHistoryRepository.findByTransactionIdAndCreatedByNameLike(paginationData.getId(),
                         PERCENTAGE + paginationData.getFindItem() + PERCENTAGE, paging).toList();
             } else {
                 try {
+                    log.info("Sorting by payment amount, fetching payment history for transaction id ::{} and payment amount ::{}", paginationData.getId(), paginationData.getFindItem());
                     Double paymentAmount = Double.parseDouble(paginationData.getFindItem());
                     paymentHistories = paymentHistoryRepository.findByTransactionIdAndPaymentAmount(paginationData.getId(),
                             paymentAmount, paging).toList();
                 } catch (NumberFormatException e){
+                    log.info("Sorting by payment history, fetching payment history for transaction id ::{} and payment history like ::{}", paginationData.getId(), paginationData.getFindItem());
                     paymentHistories = paymentHistoryRepository.findByPaymentHistory(paginationData.getId(),
                             PERCENTAGE +paginationData.getFindItem()+ PERCENTAGE, paging).toList();
                 }
@@ -417,7 +460,7 @@ public class BillServiceImpl extends BillServiceImplBuilder implements BillServi
             }
             return paymentHistoryList(OK, paymentResponses);
         }
-        return paymentHistoryList(BAD_REQUEST, paymentResponses);
+        return paymentHistoryList(OK, paymentResponses);
     }
     /**
      * @param paymentId
@@ -497,4 +540,6 @@ public class BillServiceImpl extends BillServiceImplBuilder implements BillServi
         PaymentHistory saved = paymentHistoryRepository.save(buildPaymentHistoryTransaction(dataRequest));
         return httpResponse(HttpStatus.CREATED, "Payment Update (" + saved.getPaymentAmount() + ")" + SAVE_SUCCESS);
     }
+
+
 }

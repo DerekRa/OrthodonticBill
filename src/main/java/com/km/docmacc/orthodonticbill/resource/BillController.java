@@ -118,9 +118,19 @@ public class BillController extends BuildValidationResponseEntity {
                 .orderBy(orderBy)
                 .findItem(findItem)
                 .build();
-        ResponseEntity<List<BillBreakdown>> validation = validationPaginationBreakdownRequest(dataRequest);
+        ResponseEntity<List<BillBreakdown>> validation = validationPaginationPrintBreakdownRequest(dataRequest);
         return validation.getStatusCode().equals(OK) ?
                 billService.getBillBreakdownList(dataRequest) : validation;
+    }
+    //Not yet added to angular
+    @GetMapping(FORWARD_SLASH + BREAKDOWN + FORWARD_SLASH + PRINT)
+    public ResponseEntity<List<OrthoBillBreakdown>> getBillBreakdownPrint(@RequestParam Long billId) {
+        log.info("Get orthodontic bill breakdown for printing with request data billId : {}",
+            billId);
+
+        ResponseEntity<List<OrthoBillBreakdown>> validation = validationPrintBreakdownRequest(billId);
+        return validation.getStatusCode().equals(OK) ?
+            billService.getBillBreakdownListPrint(billId) : validation;
     }
     // Added on service for angular - Feb 10, 2025
     @GetMapping(FORWARD_SLASH + HISTORY)

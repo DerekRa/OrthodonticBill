@@ -11,6 +11,7 @@ public interface BillService {
     ResponseEntity<List<OrthoBillDataResponse>> getOrthoBillList(PaginationData paginationData);
     ResponseEntity<OrthoBillDataResponse> getOrthoBill(Long billId, Long profileId);
     ResponseEntity<List<BillBreakdown>> getBillBreakdownList(PaginationData paginationData);
+    ResponseEntity<List<OrthoBillBreakdown>> getBillBreakdownListPrint(Long billId);
     ResponseEntity<List<OrthoBillDataChangeResponse>> getBillChangeList(PaginationData paginationData);
     ResponseEntity<List<AdditionalChargeResponse>> getAdditionalChargeList(PaginationData paginationData);
     ResponseEntity<AdditionalChargeResponse> getAdditionalCharge(Long chargeId);
