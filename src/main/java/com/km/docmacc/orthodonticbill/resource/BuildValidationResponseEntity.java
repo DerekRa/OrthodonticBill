@@ -153,13 +153,21 @@ public class BuildValidationResponseEntity extends BuildResponseEntity {
         }
         return orthoBillDataResponseList(OK, orthodonticBillDataResponses);
     }
-    protected ResponseEntity<List<BillBreakdown>> validationPaginationBreakdownRequest(PaginationData requestDto) {
+    protected ResponseEntity<List<BillBreakdown>> validationPaginationPrintBreakdownRequest(PaginationData requestDto) {
         List<BillBreakdown> billBreakdowns = new ArrayList<>();
         if (requestDto.getId() <= 0L) {
             log.warn("The Orthodontic Bill ID to get is different.");
             return billBreakdownList(BAD_REQUEST, billBreakdowns);
         }
         return billBreakdownList(OK, billBreakdowns);
+    }
+    protected ResponseEntity<List<OrthoBillBreakdown>> validationPrintBreakdownRequest(Long billId) {
+        List<OrthoBillBreakdown> billBreakdowns = new ArrayList<>();
+        if (billId <= 0L) {
+            log.warn("The Orthodontic Bill ID to get is different.");
+            return billBreakdownListPrint(BAD_REQUEST, billBreakdowns);
+        }
+        return billBreakdownListPrint(OK, billBreakdowns);
     }
     protected ResponseEntity<List<OrthoBillDataChangeResponse>> validationPaginationBillHistoryRequest(PaginationData requestDto) {
         List<OrthoBillDataChangeResponse> orthoBillDataChangeResponses = new ArrayList<>();

@@ -26,6 +26,7 @@ public class BillGlobalConstants {
     public static final String ADDITIONAL_CHARGE = "additionalCharge";
     public static final String PAYMENT = "payment";
     public static final String BREAKDOWN = "breakdown";
+    public static final String PRINT = "print";
     public static final String HISTORY = "history";
     public static final String PATIENTS_WITH_RECORDS = "patientsWithRecords";
     /*Pagination*/
